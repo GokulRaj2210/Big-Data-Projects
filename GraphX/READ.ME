@@ -1,0 +1,23 @@
+You are asked to implement the PageRank using Pregel on Spark GraphX. A file project8/src/main/scala/PageRank.scala is provided that contains part of the code, as well as scripts to build and run this code on Comet. You should modify PageRank.scala only. More specifically, you need to replace the question marks (?) with Spark code. You should leave the rest of the code as is.
+
+PageRank is calculated from:
+
+Pi=(1−a)1N+a∑j⟶iPjCj 
+
+where j⟶i means that there is an edge (a link) from vertex j to vertex i and:
+
+N : # of vertices
+a : weight (=0.85)
+Pi : pagerank of vertex i 
+Ci : vertex degree (# of outgoing links from vertex i )
+
+You can compile PageRank.scala using:
+
+run pagerank.build
+and you can run it in local mode over the small graph using:
+
+sbatch pagerank.local.run
+You should modify and run your programs in local mode until you get the correct result (as in small-solution.txt). After you make sure that your program runs correctly in local mode, you run it in distributed mode using:
+
+sbatch pagerank.distr.run
+This will work on the moderate-sized graph and will print the results to the output. Your results should be similar to those in large-solution.txt.
