@@ -1,0 +1,11 @@
+You are asked to re-implement Project #1 (Twitter data analysis) using Apache Pig. In your Pig script, you can access the path of the input dataset as '$G' and the output path as '$O'. That is, you can use LOAD '$G' USING ..., to load the dataset and STORE X INTO '$O' ..., to write the relation X to the output directory.
+
+To run it in local mode over the small dataset use:
+
+sbatch twitter.local.run
+These results should be similar to the results in the file small-solution.txt.
+
+After you make sure that your program runs correctly in local mode, you run it in distributed mode using:
+
+sbatch twitter.distr.run
+This will process the twitter on the large Twitter dataset and will write the result in the directory output-distr. These results should be similar to the results in the file large-solution.txt.
