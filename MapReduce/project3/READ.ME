@@ -1,0 +1,90 @@
+You will implement the single-source shortest path (Links to an external site.) algorithm using Map-Reduce and will evaluate it on the Twitter data given in Project 1. A directed graph is represented in the input text file using one line per graph edge. For example, the line 2,1 represents an edge from vertex 1 to vertex 2. For example, the following graph:
+p3-2.png 
+is represented in the input file as follows:
+
+2,1
+3,1
+3,2
+4,2
+4,3
+5,3
+6,4
+1,5
+3,7
+Given a directed graph and a starting vertex, your program must find the shortest distance between the starting point and any vertex in the graph. For the above graph and for the vertex 1 as the starting vertex, the result should be the following list of vertices along with their distance from vertex 1 (vertex 7 is not included because it cannot be reached from vertex 1):
+
+1 0
+2 1
+3 1
+4 2
+5 2
+6 3
+Like most graph algorithms, this is an iterative algorithm. Let Ri be the shortest distance from the starting point s to a vertex i. Initially, Ri is 0 for vertex s and ∞ for the others. Then, if there is an edge from i to j (this corresponds to the follows relationship on Twitter), then Rj can be replaced by Ri+1 if it is less than Rj.
+
+p3.png 
+
+Like any graph algorithm on Map-Reduce, we need to pass the graph topology from the input to the output of Map-Reduce so that this Map-Reduce can be applied many times. See slides 33-35 in bigdata-l03.pdf. The first Map-Reduce job is to convert the graph into a compact mode where each vertex is associated with a vector of following ids. For example, vertex 1 in the example graph above is associated with the Vector {2,3}. The following Tagged class (given in Graph.java) are the values passed through the second Map-Reduce that capture two kinds of data: if tag=true, a Tagged value is a vertex in compact form where distance is the minimum distance from the starting point, if tag=false, the distance is an incoming contribution from the followers of the vertex:
+
+class Tagged implements Writable {
+    public boolean tag;                // true for a graph vertex, false for distance
+    public int distance;               // the distance from the starting vertex
+    public Vector<Integer> following;  // the vertex neighbors
+
+    Tagged ( int d ) { tag = false; distance = d; }
+    Tagged ( int d, Vector f ) { tag = true; distance = d; following = f; }
+}
+The following pseudo-code finds the connected components. The second Map-Reduce will be evaluated 5 times. The third Map-Reduce job (which is just a map) selects the vertices that can be reached from the starting point in <= 5 steps:
+
+map1 ( key, line ):
+  read 2 integers from the line into the variables id and follower (delimiter is comma ",")
+  emit( follower, id )
+
+reduce1 ( follower, ids ):
+  Vector following
+  for id in ids:
+      append id to following
+  if (follower == start_id || follower == 1)   // starting vertex is either start_id (distributed mode) or 1 (local mode)
+     emit( follower, Tagged(0,following) )           // starting vertex has distance 0
+  else emit( follower, Tagged(max_int,following) )   // all others have infinite distance (max_int is max integer)
+
+map2 ( follower, tagged ):
+  emit(follower,tagged)
+  if (value.distance < max_int)
+    for id in tagged.following:
+        emit( id, tagged.distance+1 )    // propagate the follower distance + 1 to its following
+
+reduce2 ( id, values ):
+  m = max_int          // this will have the minimum of all incoming distances and its own distance
+  following = null
+  for v in values:
+      if (v.distance < m)
+         m = v.distance
+      if (v.tag)
+         following = v.following
+  emit(id,new Tagged(m,following))
+
+map3 ( follower, tagged ):
+  if ( tagged.distance < max_int )  // keep only the vertices that can be reached
+     emit(follower,value.distance)
+You need to code this in Graph.java. The args vector in your main program has the path names: args[0] is the input graph, args[1] is the prefix for the intermediate directories, and args[2] is the output. The first Map-Reduce job writes on the directory args[1]+"0". The second Map-Reduce job reads from the directory args[1]+i and writes in the directory args[1]+(i+1), where i is the for-loop index you use to repeat the second Map-Reduce job. The third Map-Reduce job reads from args[1]+"5" and writes on args[2]. The intermediate results between Map-Reduce jobs must be stored using SequenceFileOutputFormat. The input of the first and the output of the third Map-Reduce must be in Text Format.
+
+A minimal project3/src/main/java/Graph.java is provided, as well as scripts to build and run this code on Comet. You should modify Graph.java only. There is one small graph in small-graph.csv for testing in local mode. It is the graph shown in the figure above. Then, you will use the Twitter graph for testing in distributed mode. The solution for the large graph is given at large-solution.txt.
+
+To compile and run project3 on your laptop, see the directions in Project1:
+
+cd project3
+mvn install
+rm -rf temp output
+~/hadoop-2.6.5/bin/hadoop jar target/*.jar Graph small-graph.csv temp output
+The file output/part-r-00000 must contain the same results as in file small-solution.txt.
+
+To compile Graph.java on Comet, use:
+
+run graph.build
+and you can run it in standalone mode over the small graph small-graph.csv using:
+
+sbatch graph.local.run
+You should modify and run your programs in standalone mode until you get the same results as in small-solution.txt. After you make sure that your program runs correctly in standalone mode, you run it in distributed mode using:
+
+sbatch graph.distr.run
+This will work on the Twitter data used in Project1 and will write the results in the directory output-distr. These results must be the same as in large-solution.txt.
