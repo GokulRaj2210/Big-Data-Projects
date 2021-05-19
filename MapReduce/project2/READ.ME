@@ -1,0 +1,14 @@
+In this project, you are asked to improve the performance of your code developed in Project 1:
+
+1) using a combiner for the first Map-Reduce job and 2) using in-mapper combining for the second Map-Reduce job . See pages 14-18 in the class notes.
+
+Instructions for Comet: Go inside the directory project2.
+
+run twitter.build
+and you can run Twitter.java in standalone mode over a small dataset using:
+
+sbatch twitter.local.run
+The file twitter.local.out will contain the trace log of the Map-Reduce evaluation while the file output/part-r-00000 will contain the results. These results must be equal to small-solution.txt. To run Twitter.java in distributed mode over a larger dataset, use:
+
+sbatch twitter.distr.run
+The file twitter.distr.out will contain the trace log of the Map-Reduce evaluation while the file output-distr/part-r-00000 will contain the results. These results must be equal to large-olution.txt. Note that running in distributed mode will waste at least 10 of your SUs so do this after you make sure that your program works correctly for small data (it produces the same results as the solution).
