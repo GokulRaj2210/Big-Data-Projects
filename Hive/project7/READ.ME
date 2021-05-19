@@ -1,0 +1,9 @@
+You are asked to re-implement Project #1 (Twitter data analysis) using Apache Hive. An empty twitter.hql is provided as well as scripts to run this code on Comet. The input data are the same as in Project #1. Note: you can access the input data in Hive (which are passed as a parameter) as '${hiveconf:G}'.
+
+To run it in local mode over the two small matrices do:
+
+sbatch twitter.local.run
+After you make sure that your program runs correctly in local mode (the output is the same as the solution), you run it in distributed mode using:
+
+sbatch twitter.distr.run
+This will process the the large twitter data. Your results should be similar to the results in the file large-solution.txt.
