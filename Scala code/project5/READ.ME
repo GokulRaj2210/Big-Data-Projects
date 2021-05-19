@@ -1,0 +1,35 @@
+You are asked to re-implement Project #3 (single-source shortest path) using Spark and Scala. Do not use Hadoop Map-Reduce. An empty project5/src/main/scala/Graph.scala is provided, as well as scripts to build and run this code on Comet. You should modify Graph.scala only. Your main program should take the text file that contains the graph (small-graph.csv or large-graph.csv) as an argument.
+
+Here is the incomplete code:
+
+val graph: RDD[(Int,Int)]
+     = sc.textFile(args(0))
+         .map( ? )                // create a graph edge (i,j), where i follows j
+
+var R: RDD[(Int,Int)]             // initial shortest distances
+     = graph.groupByKey()
+            .map( ?? )            // starting point has distance 0, while the others max_int
+
+for (i <- 0 until iterations) {
+   R = R.join(graph)
+        .flatMap( ??? )           // calculate distance alternatives
+        .reduceByKey( ???? )      // for each node, find the shortest distance
+}
+
+R.filter( ????? )                 // keep only the vertices that can be reached
+ .sortByKey()
+ .collect().foreach(println)
+You need to fill out the 5 missing functionals (those with ?). The graph is represented as an RDD[ ( Int, Int ) ] where each (i,j) indicates that user i follows the user j. The shortest distances are stored in R of type RDD[ ( Int, Int ) ] where each (i,d) indicates that node i has shortest distance from the starting point equal to d.
+
+The initial R assigns 0 to the starting point (0 or start_id) and infinity (ie, max_int) for the others. The for-loop calculates the new R from the current R by joining R with graph and generates the candidates for shortest paths. That is, for each edge (i,j) in graph, where node i has distance d, return (i,d) but if d is not infinite, also return (j,d+1) (see figure in Project 3).
+
+You can compile Graph.scala using:
+
+run graph.build
+and you can run it in local mode over the small graph using:
+
+sbatch graph.local.run
+Your result should be the same as the small-solution.txt. You should modify and run your programs in local mode until you get the correct result. After you make sure that your program runs correctly in local mode, you run it in distributed mode using:
+
+sbatch graph.distr.run
+This will work on the moderate-sized graph and will print the results to the output. It should be the same as large-solution.txt.
