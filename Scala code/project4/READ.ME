@@ -1,0 +1,12 @@
+For this project, you need to implement Problem 1 using Spark. Do not use Hadoop Map-Reduce. First, for each twitter user, you count the number of users she follows. Then, you group the users by their number of the users they follow and for each group you count how many users belong to this group.  You should sort the output by the number of the users they follow. The data files are the same as those used in Project 1. You should modify the file src/main/scala/Twitter.scala only. The name of the input file is in args(0). You should print the results to the output.
+
+You can compile Twitter.scala on Comet using:
+
+run twitter.build
+and you can run it in local mode over the small data using:
+
+sbatch twitter.local.run
+You should modify and run your programs in local mode until you get the correct result. Your output should be similar to (but not necessarily the same as) the results in small-solution.txt. After you make sure that your program runs correctly in local mode, you run it in distributed mode using:
+
+sbatch twitter.distr.run
+This will work on the moderate-sized data and will print the results to the output. Your output should be similar to (but not necessarily the same as) the results in large-solution.txt.
